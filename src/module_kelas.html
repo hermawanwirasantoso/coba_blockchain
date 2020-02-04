@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Belajar Masa Kini</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="icon" href="images/icon.png">
+</head>
+<link rel="stylesheet" href="css/bootstrap.css">
+<script src="js/jquery-3.4.1.js"></script>
+<script src="js/popper.min.js"></script>
+<script src="js/bootstrap.js"></script>
+<link rel="stylesheet" href="css/belajar-masa-kini.css">
+<body>
+<script src="js/7.7.0_firebase-app.js"></script>
+<script src="js/7.7.0_firebase-firestore.js"></script>
+<script src="js/init-firebase.js"></script>
+<script src="js/firestore-helper.js"></script>
+<input id="page" type="hidden" value="0">
+<nav class="navbar navbar-expand-md navbar-light bg-clear fixed-top nav-shadow">
+
+    <a class="navbar-brand" href="index.html">
+        <img src="images/logo.png" alt="Logo" width="200">
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item mr-5 active">
+                <a class="nav-link nav-bmk" href="lihat_kelas.html">LIHAT<br>KELAS <span
+                        class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item mr-5">
+                <a class="nav-link nav-bmk" href="#">KELAS<br>SAYA</a>
+            </li>
+<!--            <li class="nav-item">-->
+<!--                <a class="nav-link nav-bmk" href="#">TUGAS<br>SAYA</a>-->
+<!--            </li>-->
+        </ul>
+        <ul class="navbar-nav my-2 my-lg-0">
+            <li class="nav-item">
+                <a class="navbar-brand" href="">
+                    <img src="images/profile_default.png" alt="Logo" width="50">
+                    <a class="nav-bmk" style="color: black" href="#">NAME</a>
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>
+<div class="bg-gray padding-navbar">
+    <div class="container-fluid">
+        <div class="row">
+            <nav class="col-md-2 d-none d-md-block bg-clear sidebar mt-3">
+                <div class="sidebar-sticky">
+                    <ul id="sidemenus" class="nav flex-column pt-4">
+                        <script>
+                            const pageCount = 10;
+                            const pageSession = "pageSession";
+                            for (var i = 0; i<pageCount; i++) {
+                                const li = document.createElement('li');
+                                li.className = 'nav-item my-1 px-3';
+                                let page = localStorage.getItem(pageSession);
+                                if (page==null){
+                                    page = 0;
+                                }
+                                var aClass = "nav-link form-control btn-outline-dark";
+                                console.log("Page = "+page);
+                                console.log("I = "+i);
+                                if (page==i){
+                                    aClass = "nav-link active form-control btn-outline-dark";
+                                }
+                                li.innerHTML =
+                                    '<a id="sidemenu-' + (i + 1) + '" onclick="onPageNavigationClick(this.id)" class="'+aClass+'" href="#">\n' +
+                                    'Halaman ' + (i + 1) + '<span class="sr-only">(current)</span>\n' +
+                                    '</a>';
+                                document.getElementById('sidemenus').appendChild(li);
+                            }
+
+                            function unactiveAllNav() {
+                                for (let i=0; i<pageCount; i++){
+                                    let a = document.getElementById("sidemenu-"+(i+1));
+                                    a.className = "nav-link form-control btn-outline-dark";
+                                }
+                            }
+
+                            function onPageNavigationClick(elementId) {
+                                unactiveAllNav();
+                                let a = document.getElementById(elementId);
+                                a.className ="nav-link active form-control btn-outline-dark";
+                                console.log("Clicked: "+elementId);
+                                let page = elementId.split("-");
+                                console.log("Stored Page: "+(page[1]-1));
+                                localStorage.setItem(pageSession, (page[1]-1));
+                            }
+                        </script>
+                    </ul>
+                </div>
+            </nav>
+            <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4 bg-clear">
+                <h1>Pendahuluan</h1><br>
+                <p class="text-justify">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eu ipsum tempus,
+                    auctor urna vitae, porta lacus. Suspendisse vulputate nibh et nisl euismod, eu consectetur lacus
+                    tempus. Donec dapibus ornare arcu, sit amet eleifend libero laoreet sed. Maecenas sagittis et tellus
+                    non sagittis. Ut elit nisl, suscipit a ex a, scelerisque porttitor est. Proin congue augue et risus
+                    laoreet, eu ultrices arcu egestas. Ut eleifend diam justo, eu fermentum odio vulputate at. Etiam
+                    viverra, nibh vel vestibulum ullamcorper, felis neque pretium risus, fermentum interdum orci ex at
+                    sapien. Nulla eget aliquet nibh. Quisque eget tincidunt ex. Donec tempus orci vel nisl ornare
+                    feugiat. Donec vel ante porttitor, feugiat nibh at, tincidunt sem. Sed et auctor massa. Curabitur
+                    vulputate fringilla sem, in scelerisque arcu efficitur quis. Donec ac leo id mauris aliquam luctus.
+                    <br>
+                    <br>
+                    In nisl nisl, tempus ac ultricies sit amet, faucibus sit amet quam. Phasellus vel eleifend nulla.
+                    Integer quis erat ac neque porta bibendum vel id est. Maecenas imperdiet odio non metus sodales
+                    sodales. Nullam tincidunt nulla at massa iaculis pretium. Nulla et eros pulvinar, blandit justo nec,
+                    ullamcorper lorem. Phasellus scelerisque dictum nibh, et consequat nisi finibus sit amet. Nam in
+                    justo dapibus, euismod mauris quis, ornare orci. Quisque varius quam sed malesuada tempus.
+                    Suspendisse nulla leo, ultricies in libero quis, feugiat lacinia elit. Donec sem odio, consectetur
+                    quis justo non, mollis ullamcorper lacus. Cras arcu quam, sodales non est nec, hendrerit aliquam
+                    nunc. Fusce urna nibh, pulvinar in vestibulum accumsan, ultricies a justo.
+                    <br>
+                    <br>
+                    Ut sed erat laoreet, porta nibh in, lobortis ligula. Curabitur consectetur commodo lobortis. Integer
+                    imperdiet, arcu at hendrerit ultricies, odio augue lobortis ante, eget pretium turpis ex eu mi.
+                    Aliquam sed dui vel mi luctus bibendum eget sed tortor. Sed aliquam cursus magna sed scelerisque.
+                    Sed laoreet vehicula egestas. Curabitur sollicitudin mauris est, ac lacinia elit fermentum non.
+                    Integer a ultrices lorem, sit amet commodo arcu. Maecenas porta mi non magna aliquam, quis finibus
+                    lorem fermentum.
+                    <br><br>
+                    Integer risus sem, posuere et massa vel, vestibulum rutrum urna. Suspendisse potenti. Sed posuere
+                    augue sed elementum tincidunt. Suspendisse tincidunt ullamcorper imperdiet. In mi ligula, sodales a
+                    mi ac, convallis rhoncus erat. Nullam nec turpis vel nibh viverra bibendum. Cras felis nisl, auctor
+                    non diam nec, varius malesuada lectus. Aenean sit amet nibh vel massa porta placerat vitae vitae
+                    urna. Cras metus nunc, porttitor auctor egestas non, consectetur et sem. Lorem ipsum dolor sit amet,
+                    consectetur adipiscing elit. Curabitur bibendum risus blandit turpis pharetra tempus. Vivamus at dui
+                    arcu. Integer elementum ex elit, vitae elementum lectus elementum sodales.
+                    <br><br>
+                    Donec accumsan dui eu justo eleifend, et tincidunt turpis iaculis. Pellentesque nunc odio, laoreet
+                    id lorem vitae, suscipit bibendum eros. Maecenas luctus libero a lectus iaculis ornare. Integer
+                    facilisis sollicitudin nunc, semper porta nisl tincidunt id. Morbi vitae enim ex. Ut laoreet
+                    molestie lectus, non gravida nulla consequat a. Vestibulum pulvinar lobortis vestibulum. Duis sit
+                    amet quam rutrum nisl consectetur volutpat et vitae leo.
+                    <br><br>
+                    Nullam et feugiat ex, sed tempor ipsum. Sed sagittis ac diam sit amet placerat. Donec pretium
+                    pretium faucibus. Aliquam vehicula accumsan urna, ut ultrices quam consectetur non. Sed lobortis
+                    congue libero, eget pellentesque mauris. Donec euismod semper purus. Integer sagittis eleifend nunc
+                    ut volutpat. Pellentesque placerat posuere ligula, in eleifend arcu laoreet semper. Phasellus
+                    accumsan congue dolor. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere
+                    cubilia Curae; Suspendisse vulputate sagittis feugiat. Integer dictum urna nec bibendum finibus.
+                    Donec faucibus varius arcu vitae semper.
+                    <br><br>
+                    Fusce nunc purus, aliquet et lorem a, lobortis mattis eros. Sed aliquet elit consectetur euismod
+                    gravida. Morbi eu tincidunt lorem. Phasellus eu sem convallis diam varius vehicula. Ut lacinia
+                    vestibulum sapien eget mollis. Nunc leo ipsum, volutpat sit amet neque a, ultrices rhoncus libero.
+                    Maecenas in accumsan urna, sed dapibus sem.
+                    <br><br>
+                    Quisque vitae turpis quam. Cras varius molestie nibh, ac posuere justo pharetra nec. Aliquam
+                    bibendum massa facilisis, tincidunt nisi et, scelerisque sem. Nullam vel iaculis lectus, a pulvinar
+                    augue. Mauris eu sapien magna. Praesent non placerat mauris. Nam sed sapien vel sapien facilisis
+                    euismod quis iaculis lacus. Nullam molestie arcu non arcu commodo, ac pulvinar enim aliquet.
+                    <br><br>
+                    Integer posuere sem quis egestas lacinia. Aliquam ut augue nec velit accumsan vehicula in sed
+                    sapien. Mauris quis ex vitae lectus semper dictum non ut mi. Cras facilisis facilisis sollicitudin.
+                    Curabitur ac scelerisque eros. Nam sed maximus urna. Sed auctor ultricies sapien, eget eleifend
+                    nunc. Sed sed hendrerit libero, vehicula imperdiet felis. Fusce in ligula vehicula, consequat felis
+                    vitae, finibus risus.
+                    <br><br>
+                    Donec porttitor odio pharetra, fermentum urna vel, accumsan risus. Vestibulum tempor lectus vitae
+                    velit finibus, non iaculis lacus convallis. Proin elementum scelerisque ligula sed eleifend. Sed
+                    arcu ex, euismod eu elementum vel, tristique a nisi. Phasellus orci magna, facilisis nec accumsan
+                    id, rhoncus vitae dolor. Nunc pulvinar pellentesque turpis, at malesuada orci molestie at.
+                    Pellentesque sed ultricies ante, non semper urna. Sed id mauris at eros egestas laoreet. Quisque
+                    varius mauris consectetur mauris pulvinar, lacinia congue metus malesuada. Aliquam at enim ut libero
+                    condimentum dapibus. Nullam tempor laoreet tellus id volutpat.</p>
+                <div class="row px-5">
+                    <div class="col-6 p-3">
+                        <input type="button" value="Sebelumnya" onclick="previous()" class="my-3 btn-outline-dark form-control">
+                    </div>
+                    <div class="col-6 p-3">
+                        <input type="button" value="Berikutnya" onclick="next()" class="my-3 btn-dark form-control">
+                        <script>
+                            function finish() {
+                                window.location.replace('kelas_selesai.html');
+                                return false;
+                            }
+
+                            function next(){
+                                var currentPage = localStorage.getItem(pageSession);
+                                if (currentPage<pageCount-1){
+                                    currentPage++;
+                                    localStorage.setItem(pageSession, currentPage);
+                                    window.location.replace('module_kelas.html');
+                                }else {
+                                    console.log("Finish invoked");
+                                    finish();
+                                }
+                            }
+
+                            function previous() {
+                                var currentPage = localStorage.getItem(pageSession);
+                                if (currentPage>0){
+                                    currentPage--;
+                                    localStorage.setItem(pageSession, currentPage);
+                                    window.location.replace('module_kelas.html');
+                                }else {
+                                    alert("Anda Di Halaman Pertama")
+                                }
+                            }
+                        </script>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

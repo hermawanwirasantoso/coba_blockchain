@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Belajar Masa Kini</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="icon" href="images/icon.png">
+    <script src="js/7.7.0_firebase-app.js"></script>
+    <script src="js/7.7.0_firebase-analytics.js"></script>
+    <script src="js/7.7.0_firebase-auth.js"></script>
+    <script src="js/7.7.0_firebase-firestore.js"></script>
+    <script src="js/3.5.2_firebaseui.js"></script>
+    <link type="text/css" rel="stylesheet" href="css/3.5.2_firebaseui.css" />
+    <script src="js/init-firebase.js"></script>
+    <script src="js/init-firebase-ui.js"></script>
+    <script src="js/firestore-helper.js"></script>
+</head>
+<link rel="stylesheet" href="css/bootstrap.css">
+<script src="js/jquery-3.4.1.js"></script>
+<script src="js/popper.min.js"></script>
+<script src="js/bootstrap.js"></script>
+<link rel="stylesheet" href="css/belajar-masa-kini.css">
+<body>
+<nav class="navbar navbar-expand-md navbar-light bg-clear fixed-top nav-shadow">
+
+    <a class="navbar-brand" href="index.html">
+        <img src="images/logo.png" alt="Logo" width="200">
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item mr-5 active">
+                <a class="nav-link nav-bmk" href="lihat_kelas.html">LIHAT<br>KELAS <span
+                        class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item mr-5">
+                <a class="nav-link nav-bmk" href="#">KELAS<br>SAYA</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link nav-bmk" href="#">TUGAS<br>SAYA</a>
+            </li>
+        </ul>
+        <ul class="navbar-nav my-2 my-lg-0">
+            <li class="nav-item">
+                <a class="navbar-brand" href="">
+                    <img src="images/profile_default.png" alt="Logo" width="50">
+                    <a id="profile-name" class="nav-bmk" style="color: black" href="#">NAME</a>
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>
+<div class="padding-navbar">
+    <div id="firebaseui-auth-container" class="mt-5"></div>
+    <div id="loader">Loading...</div>
+</div>
+<script>
+    var uiConfig = {
+        callbacks: {
+            signInSuccessWithAuthResult: function(authResult, redirectUrl) {
+                // User successfully signed in.
+                // Return type determines whether we continue the redirect automatically
+                // or whether we leave that to developer to handle.
+                return true;
+            },
+            uiShown: function() {
+                // The widget is rendered.
+                // Hide the loader.
+                document.getElementById('loader').style.display = 'none';
+            }
+        },
+        // Will use popup for IDP Providers sign-in flow instead of the default, redirect.
+        signInFlow: 'popup',
+        signInSuccessUrl: '<url-to-redirect-to-on-success>',
+        signInOptions: [
+            firebase.auth.EmailAuthProvider.PROVIDER_ID
+        ],
+        // Terms of service url.
+        tosUrl: '<your-tos-url>',
+        // Privacy policy url.
+        privacyPolicyUrl: '<your-privacy-policy-url>'
+    };
+    ui.start('#firebaseui-auth-container', uiConfig);
+
+    firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+            document.getElementById("profile-name").innerHTML = user.displayName;
+        } else {
+            document.getElementById("profile-name").innerHTML = "Login/Sign-Up";
+        }
+    });
+</script>
+</body>
+</html>

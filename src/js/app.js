@@ -25,7 +25,9 @@ App = {
 
   permissionAccount: async function() {
     if(window.ethereum) {
-      await ethereum.enable();
+      await ethereum.enable().then(function () {
+        App.render();
+      });
     }
   },
 
@@ -36,7 +38,7 @@ App = {
       // Connect provider to interact with contract
       App.contracts.Election.setProvider(App.web3Provider);
 
-      return App.render();
+      // return App.render();
     });
   },
 
@@ -51,6 +53,7 @@ App = {
     // Load account data
     web3.eth.getCoinbase(function(err, account) {
       if (err === null) {
+
         App.account = account;
         $("#accountAddress").html("Your Account: " + account);
       }
@@ -64,22 +67,44 @@ App = {
       var candidatesResults = $("#candidatesResults");
       candidatesResults.empty();
 
+      var candidateSelect = $("#candidatesSelect");
+      candidateSelect.empty();
+
       for (var i = 1; i <= candidatesCount; i++) {
-        electionInstance.candidates(i).then(function(candidate) {
+        electionInstance.candidates(i).then(function (candidate) {
           var id = candidate[0];
           var name = candidate[1];
           var voteCount = candidate[2];
 
           // Render candidate Result
-          var candidateTemplate = "<tr><th>" + id + "</th><td>" + name + "</td><td>" + voteCount + "</td></tr>"
+          var candidateTemplate = "<tr><th>" + id + "</th><td>" + name + "</td><td>" + voteCount + "</td></tr>";
           candidatesResults.append(candidateTemplate);
+
+          var candidateOption = "<option value='" + id + "'>" + name + "</option>";
+          candidateSelect.append(candidateOption);
         });
       }
-
+      return electionInstance.voters(App.account);
+    }).then(function (hasVoted) {
+      if (hasVoted){
+        $('form').hide();
+      }
       loader.hide();
       content.show();
     }).catch(function(error) {
       console.warn(error);
+    });
+  },
+
+  castVote: function () {
+    var candidateId = $('#candidatesSelect').val();
+    App.contracts.Election.deployed().then(function (instance) {
+      return instance.vote(candidateId,{ from: App.account });
+    }).then(function (result) {
+      $('#content').hide();
+      $('#loader').show();
+    }).catch(function (err) {
+      console.error(err);
     });
   }
 };
