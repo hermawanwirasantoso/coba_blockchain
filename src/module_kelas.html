@@ -11,14 +11,19 @@
 <script src="js/popper.min.js"></script>
 <script src="js/bootstrap.js"></script>
 <link rel="stylesheet" href="css/belajar-masa-kini.css">
-<body>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
 <script src="js/7.7.0_firebase-app.js"></script>
 <script src="js/7.7.0_firebase-firestore.js"></script>
 <script src="js/init-firebase.js"></script>
 <script src="js/firestore-helper.js"></script>
-<input id="page" type="hidden" value="0">
-<nav class="navbar navbar-expand-md navbar-light bg-clear fixed-top nav-shadow">
+<script src="js/truffle-contract.js"></script>
+<script src="js/app.js"></script>
 
+<body>
+
+<input id="page" type="hidden" value="0">
+<nav class="navbar navbar-expand-md navbar-light bg-clear fixed-top">
     <a class="navbar-brand" href="index.html">
         <img src="images/logo.png" alt="Logo" width="200">
     </a>
@@ -28,22 +33,22 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
-            <li class="nav-item mr-5 active">
+            <li class="nav-item mr-5">
                 <a class="nav-link nav-bmk" href="lihat_kelas.html">LIHAT<br>KELAS <span
                         class="sr-only">(current)</span></a>
             </li>
             <li class="nav-item mr-5">
-                <a class="nav-link nav-bmk" href="#">KELAS<br>SAYA</a>
+                <a class="nav-link nav-bmk" href="kelas_saya.html">KELAS<br>SAYA</a>
             </li>
-<!--            <li class="nav-item">-->
-<!--                <a class="nav-link nav-bmk" href="#">TUGAS<br>SAYA</a>-->
-<!--            </li>-->
+            <!--                <li class="nav-item">-->
+            <!--                    <a class="nav-link nav-bmk" href="#">TUGAS<br>SAYA</a>-->
+            <!--                </li>-->
         </ul>
         <ul class="navbar-nav my-2 my-lg-0">
             <li class="nav-item">
                 <a class="navbar-brand" href="">
                     <img src="images/profile_default.png" alt="Logo" width="50">
-                    <a class="nav-bmk" style="color: black" href="#">NAME</a>
+                    <a id="profile-name" class="nav-bmk" style="color: black" href="#"></a>
                 </a>
             </li>
         </ul>
@@ -58,41 +63,63 @@
                         <script>
                             const pageCount = 10;
                             const pageSession = "pageSession";
-                            for (var i = 0; i<pageCount; i++) {
+                            let page = localStorage.getItem(pageSession);
+                            for (var i = 0; i < pageCount; i++) {
                                 const li = document.createElement('li');
                                 li.className = 'nav-item my-1 px-3';
-                                let page = localStorage.getItem(pageSession);
-                                if (page==null){
+                                if (page == null) {
                                     page = 0;
                                 }
                                 var aClass = "nav-link form-control btn-outline-dark";
-                                console.log("Page = "+page);
-                                console.log("I = "+i);
-                                if (page==i){
+                                console.log("Page = " + page);
+                                console.log("I = " + i);
+                                if (page == i) {
                                     aClass = "nav-link active form-control btn-outline-dark";
                                 }
-                                li.innerHTML =
-                                    '<a id="sidemenu-' + (i + 1) + '" onclick="onPageNavigationClick(this.id)" class="'+aClass+'" href="#">\n' +
-                                    'Halaman ' + (i + 1) + '<span class="sr-only">(current)</span>\n' +
-                                    '</a>';
+                                if (i > 2 && App.isEnrolled() === false) {
+                                    li.innerHTML =
+                                        '<a id="sidemenu-' + (i + 1) + '" onclick="onPageNavigationClick(this.id)" class="' + aClass + '" href="#">\n' +
+                                        '<i class="material-icons mr-2" style="font-size: 16px">lock</i>Halaman ' + (i + 1) + '\n' +
+                                        '</a>';
+                                } else {
+                                    li.innerHTML =
+                                        '<a id="sidemenu-' + (i + 1) + '" onclick="onPageNavigationClick(this.id)" class="' + aClass + '" href="#">\n' +
+                                        'Halaman ' + (i + 1) + '\n' +
+                                        '</a>';
+                                }
                                 document.getElementById('sidemenus').appendChild(li);
                             }
 
                             function unactiveAllNav() {
-                                for (let i=0; i<pageCount; i++){
-                                    let a = document.getElementById("sidemenu-"+(i+1));
+                                for (let i = 0; i < pageCount; i++) {
+                                    let a = document.getElementById("sidemenu-" + (i + 1));
                                     a.className = "nav-link form-control btn-outline-dark";
                                 }
                             }
 
                             function onPageNavigationClick(elementId) {
-                                unactiveAllNav();
                                 let a = document.getElementById(elementId);
-                                a.className ="nav-link active form-control btn-outline-dark";
-                                console.log("Clicked: "+elementId);
                                 let page = elementId.split("-");
-                                console.log("Stored Page: "+(page[1]-1));
-                                localStorage.setItem(pageSession, (page[1]-1));
+                                if (!checkClassOffering(page[1] - 1)) {
+                                    unactiveAllNav();
+                                    a.className = "nav-link active form-control btn-outline-dark";
+                                    console.log("Clicked: " + elementId);
+                                    console.log("Stored Page: " + (page[1] - 1));
+                                    localStorage.setItem(pageSession, (page[1] - 1));
+                                }
+                            }
+
+                            function checkClassOffering(futurePage) {
+                                // let i = localStorage.getItem(pageSession);
+                                if (!App.isEnrolled()) {
+                                    if (futurePage > 2) {
+                                        // App.showUnlockModuleDialog();
+                                        // alert("Beli CUy");
+                                        App.showEnrollModal();
+                                        return true;
+                                    }
+                                }
+                                return false;
                             }
                         </script>
                     </ul>
@@ -175,7 +202,8 @@
                     condimentum dapibus. Nullam tempor laoreet tellus id volutpat.</p>
                 <div class="row px-5">
                     <div class="col-6 p-3">
-                        <input type="button" value="Sebelumnya" onclick="previous()" class="my-3 btn-outline-dark form-control">
+                        <input type="button" value="Sebelumnya" onclick="previous()"
+                               class="my-3 btn-outline-dark form-control">
                     </div>
                     <div class="col-6 p-3">
                         <input type="button" value="Berikutnya" onclick="next()" class="my-3 btn-dark form-control">
@@ -185,13 +213,15 @@
                                 return false;
                             }
 
-                            function next(){
+                            function next() {
                                 var currentPage = localStorage.getItem(pageSession);
-                                if (currentPage<pageCount-1){
-                                    currentPage++;
-                                    localStorage.setItem(pageSession, currentPage);
-                                    window.location.replace('module_kelas.html');
-                                }else {
+                                if (currentPage < pageCount - 1) {
+                                    if (!checkClassOffering((currentPage+1))){
+                                        currentPage++;
+                                        localStorage.setItem(pageSession, currentPage);
+                                        window.location.replace('module_kelas.html');
+                                    }
+                                } else {
                                     console.log("Finish invoked");
                                     finish();
                                 }
@@ -199,20 +229,61 @@
 
                             function previous() {
                                 var currentPage = localStorage.getItem(pageSession);
-                                if (currentPage>0){
+                                if (currentPage > 0) {
                                     currentPage--;
                                     localStorage.setItem(pageSession, currentPage);
                                     window.location.replace('module_kelas.html');
-                                }else {
+                                } else {
                                     alert("Anda Di Halaman Pertama")
                                 }
+                                // classOffering();
                             }
+
+                            $(function () {
+                                $(window).on('load', function () {
+                                    let i = localStorage.getItem(pageSession);
+                                    checkClassOffering(i);
+                                });
+                            });
                         </script>
                     </div>
                 </div>
             </main>
         </div>
     </div>
+    <div class="modal fade" id="enroll-modal" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title font-basic ml-3" id="staticBackdropLabel">Beli Kelas untuk Melihat Modul</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="row mb-3">
+                            <div class="jumbotron">
+                                <h1 class="text-center font-basic">Buka Kelas Secara Penuh dan Pelajari Semua Modul yang
+                                    Tersedia</h1>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <h5 class="col-12 text-center font-basic">Harga Kelas: 20 WEI</h5>
+                        </div>
+                        <div class="row mb-3">
+                            <h5 id="current-balance" class="col-12 text-center font-basic">Current Balance: </h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-dark" data-dismiss="modal">Nanti Dulu La
+                    </button>
+                    <button type="button" class="btn btn-dark" onclick="App.enroll()">Beli</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="form-control btn-warning" onclick="App.getContractAddress()">Klik Me</button>
 </div>
 
 </body>
