@@ -3,6 +3,16 @@ App = {
     contracts: {},
     account: '0x0',
     db: firebase.firestore(),
+    isMyClass: false,
+    isModuleClass: false,
+    isMyCertificate: false,
+    classPrice: 200,
+    monthNames : [
+        "Januari", "Februari", "Maret",
+        "April", "Mei", "Juni", "Juli",
+        "Agustus", "September", "Oktober",
+        "November", "Desember"
+    ],
 
     init: function () {
         return App.initWeb3();
@@ -99,9 +109,52 @@ App = {
             App.contracts.Certification = TruffleContract(certification);
             // Connect provider to interact with contract
             App.contracts.Certification.setProvider(App.web3Provider);
+            if (App.isMyClass) {
+                App.showEnrolledClass();
+            }
+            if (App.isModuleClass){
+                App.isEnrolled();
+            }
+            if (App.isMyCertificate){
+                App.getMyPublishedCertificate();
+            }
+            App.getOwnerAddress();
         });
+        // $.getJSON("Election.json", function (election) {
+        //     // Instantiate a new truffle contract from the artifact
+        //     App.contracts.Election = TruffleContract(election);
+        //     // Connect provider to interact with contract
+        //     App.contracts.Election.setProvider(App.web3Provider);
+        //     App.render();
+        // });
     },
 
+
+    showEnrolledClass: function () {
+        var certificationInstance;
+        App.contracts.Certification.deployed().then(function (instance) {
+            certificationInstance = instance;
+            return certificationInstance.classCount(App.account);
+        }).then(function (classCount) {
+            console.log("CLASS COUNT: " + classCount);
+            var classList = [];
+            for (let i = 0; i < classCount; i++) {
+                certificationInstance.enrolledClass(App.account, i).then(function (kelas) {
+                    console.log(kelas[0]);
+                    console.log("Selesai "+kelas[2]);
+                    classList.push(kelas[0]);
+                }).then(function () {
+                    if ((i + 1) == classCount) {
+                        console.log(classList);
+                        console.log(classList.length);
+                        loadEnrolledClass(classList);
+                    }
+                })
+            }
+        }).catch(function (err) {
+            console.error(err);
+        });
+    },
     render: function () {
         var electionInstance;
         var loader = $("#loader");
@@ -167,17 +220,27 @@ App = {
         });
     },
 
-    enroll: function () {
+    enroll: function (classId) {
         //todo pay class and enroll class
 
         //bayar class
+        let certificationInstance;
         App.contracts.Certification.deployed().then(function (instance) {
-            return instance.getContractAddress();
+            certificationInstance = instance;
+            return certificationInstance.contractAddress();
         }).then(function (result) {
-            console.log(result.receipt.to);
-            let contractAddress = result.receipt.to;
-            web3.eth.sendTransaction({from: App.account, to: contractAddress ,value: web3.toWei(100, 'ether')}, function (result) {
-
+            web3.eth.sendTransaction({
+                from: App.account,
+                to: result,
+                value: web3.toWei(App.classPrice, 'ether')
+            }, function (result) {
+                $('#loading').show();
+                certificationInstance.enrollClass(web3.toWei(App.classPrice, 'ether'), classId, {from: App.account})
+                    .then(function (result) {
+                        $('#enroll-modal').modal('hide');
+                        console.log("MODAL HIDE");
+                        window.location.replace('module_kelas.html?'+classId);
+                    });
             });
         }).catch(function (err) {
             console.error(err);
@@ -186,29 +249,61 @@ App = {
         // enroll class - blockchain
 
         // enroll class - input ke firestore
-        App.db.collection(kelas_pengguna_collection).add({})
+        // App.db.collection(kelas_pengguna_collection).add({})
     },
 
     isEnrolled: function () {
-        return false;
+        var certificationInstance;
+        App.contracts.Certification.deployed().then(function (instance) {
+            certificationInstance = instance;
+            return certificationInstance.classCount(App.account);
+        }).then(function (classCount) {
+            let isModuleShowed = false;
+            if (classCount>0) {
+                for (let i = 0; i < classCount; i++) {
+                    certificationInstance.enrolledClass(App.account, i).then(function (kelas) {
+                        if (isModuleShowed ===false) {
+                            if (kelas[0] === classId) {
+                                showModules(true);
+                                console.log("TRUE");
+                                isModuleShowed = true;
+                            } else if ((i + 1) == classCount) {
+                                showModules(false);
+                                console.log("FALSE");
+                                isModuleShowed = true;
+                            }
+                            console.log("I+1 = " + (i + 1));
+                            console.log("classCount = " + classCount);
+                        }
+                    })
+                }
+            }else {
+                showModules(false);
+            }
+        }).catch(function (err) {
+            console.error(err);
+        });
     },
 
     showEnrollModal: function () {
+        $("#loading").hide();
         $("#enroll-modal").modal('show');
+        $("#harga-kelas").html("Harga Kelas: " + App.classPrice + " WEI");
         App.getCurrentAccountBalance();
+
     },
 
     getCurrentAccountBalance: function () {
         web3.eth.getBalance(App.account, function (err, balance) {
             if (err == null) {
-                $("#current-balance").html("Uang Anda: " + web3.fromWei(balance)+" WEI");
+                $("#current-balance").html("Uang Anda: " + web3.fromWei(balance) + " WEI");
             }
         });
     },
 
     getContractAddress: function () {
         App.contracts.Certification.deployed().then(function (instance) {
-            return instance.getContractAddress();
+            return instance.contractAddress();
         }).then(function (result) {
             console.log(result.receipt.to);
             let contractAddress = result.receipt.to;
@@ -216,6 +311,48 @@ App = {
         }).catch(function (err) {
             console.error(err);
         });
+    },
+
+    getOwnerAddress: function () {
+        App.contracts.Certification.deployed().then(function (instance) {
+            return instance.contractAddress();
+        }).then(function (result) {
+            console.log("CONTRACT ADDRESS: "+ result);
+        });
+        App.contracts.Certification.deployed().then(function (instance) {
+            return instance.owner();
+        }).then(function (result) {
+            console.log("OWNER ADDRESS: "+ result);
+        })
+    },
+    publishCertificate: function (classId) {
+        App.contracts.Certification.deployed().then(function (instance) {
+            return instance.publishCertificate(classId, {from:App.account});
+        }).then(function (result) {
+            $('#download-sertifikat-modal').modal('show');
+        })
+    },
+
+    getMyPublishedCertificate: function () {
+        let certificationInstance;
+        App.contracts.Certification.deployed().then(function (instance) {
+            certificationInstance = instance;
+            return certificationInstance.certificateCount()
+        }).then(function (result) {
+            let sertificateList = [];
+            for(let i =1; i<=result; i++){
+                certificationInstance.publishedCertificates(i).then(function (certificate) {
+                    if (certificate[1]===App.account){
+                        let c = new Certificate(certificate[3], certificate[2], certificate[0]);
+                        sertificateList.push(c);
+                    }
+                }).then(function () {
+                    if (i==result){
+                        showCertificates(sertificateList);
+                    }
+                })
+            }
+        })
     }
 };
 $(function () {

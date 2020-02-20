@@ -11,17 +11,13 @@
 <script src="js/popper.min.js"></script>
 <script src="js/bootstrap.js"></script>
 <link rel="stylesheet" href="css/belajar-masa-kini.css">
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons"
-      rel="stylesheet">
 <script src="js/7.7.0_firebase-app.js"></script>
 <script src="js/7.7.0_firebase-firestore.js"></script>
 <script src="js/init-firebase.js"></script>
 <script src="js/firestore-helper.js"></script>
 <script src="js/truffle-contract.js"></script>
+<script src="js/certificate.js"></script>
 <script src="js/app.js"></script>
-<script>
-    App.isMyClass = true;
-</script>
 <body>
 <nav class="navbar navbar-expand-md navbar-light bg-clear fixed-top">
     <a class="navbar-brand" href="index.html">
@@ -57,45 +53,5 @@
         </ul>
     </div>
 </nav>
-<div class="bg-gray">
-    <div id="listview" class="container padding-navbar">
-        <div id="no-class-enrolled" class="jumbotron">
-            <h1>Anda Belum Membeli Kelas Apapun</h1>
-        </div>
-    </div>
-</div>
-<script>
-    let noClassNotice = $('#no-class-enrolled');
-    noClassNotice.hide();
-    function loadEnrolledClass(classList) {
-        let documents = classList;
-        console.log("DOCUMENTS: "+documents);
-        if (documents.length<1){
-            noClassNotice.show();
-        }
-        for (let i=0; i<documents.length;i++){
-            let classId = documents[i];
-            App.db.collection(kelas_collection).doc(classId).get().then(function (doc) {
-                if (doc.exists){
-                    let name = `${doc.data().nama_kelas}`;
-                    let durasi = `${doc.data().durasi_kelas}`;
-                    var ikon = `${doc.data().icon_kelas}`;
-                    const div = document.createElement('div');
-                    div.className = 'row mt-2 p-3 bg-clear';
-                    div.innerHTML =
-                        "            <div class='col-2'>\n" +
-                        "                <img src=" + ikon + " alt='' width='150'>\n" +
-                        "            </div>\n" +
-                        "            <div class='col-10 pt-3'>\n" +
-                        "                <h1>" + name + "</h1>\n" +
-                        "                <h5>Durasi: " + durasi + " Hari</h5>\n" +
-                        "                <a href='module_kelas.html?"+doc.id+ "' class='btn-outline-dark form-control text-center'>Lihat</a>\n" +
-                        "            </div>";
-                    document.getElementById('listview').appendChild(div);
-                }
-            });
-        }
-    }
-</script>
 </body>
 </html>

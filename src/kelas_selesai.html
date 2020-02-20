@@ -3,12 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <title>Belajar Masa Kini</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="icon" href="images/icon.png">
 </head>
 <link rel="stylesheet" href="css/bootstrap.css">
 <script src="js/jquery-3.4.1.js"></script>
 <script src="js/popper.min.js"></script>
 <script src="js/bootstrap.js"></script>
 <link rel="stylesheet" href="css/belajar-masa-kini.css">
+<script src="js/7.7.0_firebase-app.js"></script>
+<script src="js/7.7.0_firebase-firestore.js"></script>
+<script src="js/init-firebase.js"></script>
+<script src="js/firestore-helper.js"></script>
+<script src="js/truffle-contract.js"></script>
+<script src="js/app.js"></script>
+<script>
+    const classId = window.location.search.substr(1);
+</script>
 <body>
 <nav class="navbar navbar-expand-md navbar-light bg-clear fixed-top">
     <a class="navbar-brand" href="index.html">
@@ -27,9 +38,12 @@
             <li class="nav-item mr-5">
                 <a class="nav-link nav-bmk" href="kelas_saya.html">KELAS<br>SAYA</a>
             </li>
-            <!--                <li class="nav-item">-->
-            <!--                    <a class="nav-link nav-bmk" href="#">TUGAS<br>SAYA</a>-->
-            <!--                </li>-->
+            <li class="nav-item mr-5">
+                <a class="nav-link nav-bmk" href="sertifikat_saya.html">SERTIFIKAT<br>SAYA</a>
+            </li>
+            <li class="nav-item mr-5">
+                <a class="nav-link nav-bmk" href="cek_sertifikat.html">CEK<br>SERTIFIKAT</a>
+            </li>
         </ul>
         <ul class="navbar-nav my-2 my-lg-0">
             <li class="nav-item">
@@ -45,15 +59,52 @@
     <div class="container">
         <div class="padding-navbar bg-clear">
             <div class="row p-5">
-                <h1 class="text-center font-basic">Selamat Anda Telah Lulus Kelas Online Belajar Masa Kini</h1>
+                <h1 id="pengumuman-lulus" class="text-center font-basic">
+
+                </h1>
             </div>
             <img src="images/certificate.png" alt="" width="100%">
             <div class="row p-5">
-                <button class="form-control btn-success">TERBITKAN SERTIFIKAT</button>
+                <button onclick="App.publishCertificate(classId)" class="form-control btn-dark font-basic">TERBITKAN SERTIFIKAT</button>
             </div>
         </div>
 
     </div>
+    <div class="modal fade" id="download-sertifikat-modal" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title font-basic ml-3" id="staticBackdropLabel">Murid Baru! Daftar Dulu Dong</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="row mb-3">
+                            <h1 class="font-basic">Sertifikatmu Telah Diterbitkan!</h1>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btn-download-certificate" class="form-control btn-dark font-basic">
+                        <a href=""></a>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+<script>
+    App.db.collection(kelas_collection).doc(classId).get()
+        .then(function (doc) {
+            if (doc.exists) {
+                $('#pengumuman-lulus').html("Selamat Anda Telah Lulus " + doc.data().nama_kelas);
+                $('#btn-download-certificate').html("<a href='"+doc.data().sertifikat_kelas+"' download='"+doc.data().sertifikat_kelas+"' target='_blank'>Download</a>\n")
+            } else {
+            }
+        });
+</script>
 </body>
 </html>

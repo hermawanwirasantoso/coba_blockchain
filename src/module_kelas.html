@@ -19,9 +19,14 @@
 <script src="js/firestore-helper.js"></script>
 <script src="js/truffle-contract.js"></script>
 <script src="js/app.js"></script>
-
+<script>
+    App.isModuleClass = true;
+    const classId = window.location.search.substr(1);
+    const pageSession = classId;
+    let futurePage = 0;
+    const pageCount = 10;
+</script>
 <body>
-
 <input id="page" type="hidden" value="0">
 <nav class="navbar navbar-expand-md navbar-light bg-clear fixed-top">
     <a class="navbar-brand" href="index.html">
@@ -40,9 +45,12 @@
             <li class="nav-item mr-5">
                 <a class="nav-link nav-bmk" href="kelas_saya.html">KELAS<br>SAYA</a>
             </li>
-            <!--                <li class="nav-item">-->
-            <!--                    <a class="nav-link nav-bmk" href="#">TUGAS<br>SAYA</a>-->
-            <!--                </li>-->
+            <li class="nav-item mr-5">
+                <a class="nav-link nav-bmk" href="sertifikat_saya.html">SERTIFIKAT<br>SAYA</a>
+            </li>
+            <li class="nav-item mr-5">
+                <a class="nav-link nav-bmk" href="cek_sertifikat.html">CEK<br>SERTIFIKAT</a>
+            </li>
         </ul>
         <ul class="navbar-nav my-2 my-lg-0">
             <li class="nav-item">
@@ -61,33 +69,37 @@
                 <div class="sidebar-sticky">
                     <ul id="sidemenus" class="nav flex-column pt-4">
                         <script>
-                            const pageCount = 10;
-                            const pageSession = "pageSession";
-                            let page = localStorage.getItem(pageSession);
-                            for (var i = 0; i < pageCount; i++) {
-                                const li = document.createElement('li');
-                                li.className = 'nav-item my-1 px-3';
-                                if (page == null) {
-                                    page = 0;
+                            let localIsEnrolled;
+                            function showModules(isEnrolled) {
+                                localIsEnrolled = isEnrolled;
+                                console.log("ISENROLLED: "+isEnrolled);
+                                let page = localStorage.getItem(pageSession);
+                                for (var i = 0; i < pageCount; i++) {
+                                    const li = document.createElement('li');
+                                    li.className = 'nav-item my-1 px-3';
+                                    if (page == null) {
+                                        page = 0;
+                                    }
+                                    var aClass = "nav-link form-control btn-outline-dark";
+                                    console.log("Page = " + page);
+                                    console.log("I = " + i);
+                                    if (page == i) {
+                                        aClass = "nav-link active form-control btn-outline-dark";
+                                    }
+                                    if (i > 2 && isEnrolled === false) {
+                                        li.innerHTML =
+                                            '<a id="sidemenu-' + (i + 1) + '" onclick="onPageNavigationClick(this.id)" class="' + aClass + '" href="#">\n' +
+                                            '<i class="material-icons mr-2" style="font-size: 16px">lock</i>Halaman ' + (i + 1) + '\n' +
+                                            '</a>';
+                                    } else {
+                                        li.innerHTML =
+                                            '<a id="sidemenu-' + (i + 1) + '" onclick="onPageNavigationClick(this.id)" class="' + aClass + '" href="#">\n' +
+                                            'Halaman ' + (i + 1) + '\n' +
+                                            '</a>';
+                                    }
+                                    document.getElementById('sidemenus').appendChild(li);
                                 }
-                                var aClass = "nav-link form-control btn-outline-dark";
-                                console.log("Page = " + page);
-                                console.log("I = " + i);
-                                if (page == i) {
-                                    aClass = "nav-link active form-control btn-outline-dark";
-                                }
-                                if (i > 2 && App.isEnrolled() === false) {
-                                    li.innerHTML =
-                                        '<a id="sidemenu-' + (i + 1) + '" onclick="onPageNavigationClick(this.id)" class="' + aClass + '" href="#">\n' +
-                                        '<i class="material-icons mr-2" style="font-size: 16px">lock</i>Halaman ' + (i + 1) + '\n' +
-                                        '</a>';
-                                } else {
-                                    li.innerHTML =
-                                        '<a id="sidemenu-' + (i + 1) + '" onclick="onPageNavigationClick(this.id)" class="' + aClass + '" href="#">\n' +
-                                        'Halaman ' + (i + 1) + '\n' +
-                                        '</a>';
-                                }
-                                document.getElementById('sidemenus').appendChild(li);
+                                checkClassOffering(page);
                             }
 
                             function unactiveAllNav() {
@@ -109,10 +121,13 @@
                                 }
                             }
 
-                            function checkClassOffering(futurePage) {
+                            function checkClassOffering(fPage) {
                                 // let i = localStorage.getItem(pageSession);
-                                if (!App.isEnrolled()) {
-                                    if (futurePage > 2) {
+                                // futurePage = fPage;
+                                console.log("fPage: "+fPage);
+                                console.log("LocalIsEnrolled: "+localIsEnrolled);
+                                if (!localIsEnrolled) {
+                                    if (fPage > 2) {
                                         // App.showUnlockModuleDialog();
                                         // alert("Beli CUy");
                                         App.showEnrollModal();
@@ -209,17 +224,19 @@
                         <input type="button" value="Berikutnya" onclick="next()" class="my-3 btn-dark form-control">
                         <script>
                             function finish() {
-                                window.location.replace('kelas_selesai.html');
+                                window.location.replace('kelas_selesai.html?'+classId);
                                 return false;
                             }
 
                             function next() {
                                 var currentPage = localStorage.getItem(pageSession);
+                                console.log("CURRENT PAGE: "+currentPage);
                                 if (currentPage < pageCount - 1) {
-                                    if (!checkClassOffering((currentPage+1))){
+                                    let futurePage = parseInt(currentPage)+1;
+                                    if (!checkClassOffering(futurePage)){
                                         currentPage++;
                                         localStorage.setItem(pageSession, currentPage);
-                                        window.location.replace('module_kelas.html');
+                                        window.location.replace('module_kelas.html?'+classId);
                                     }
                                 } else {
                                     console.log("Finish invoked");
@@ -232,19 +249,12 @@
                                 if (currentPage > 0) {
                                     currentPage--;
                                     localStorage.setItem(pageSession, currentPage);
-                                    window.location.replace('module_kelas.html');
+                                    window.location.replace('module_kelas.html?'+classId);
                                 } else {
                                     alert("Anda Di Halaman Pertama")
                                 }
                                 // classOffering();
                             }
-
-                            $(function () {
-                                $(window).on('load', function () {
-                                    let i = localStorage.getItem(pageSession);
-                                    checkClassOffering(i);
-                                });
-                            });
                         </script>
                     </div>
                 </div>
@@ -267,24 +277,32 @@
                             </div>
                         </div>
                         <div class="row mb-3">
-                            <h5 class="col-12 text-center font-basic">Harga Kelas: 20 WEI</h5>
+                            <h5 id="harga-kelas" class="col-12 text-center font-basic">Harga Kelas: 20 WEI</h5>
                         </div>
                         <div class="row mb-3">
                             <h5 id="current-balance" class="col-12 text-center font-basic">Current Balance: </h5>
                         </div>
+                        <div class="row mb-3">
+                            <h5 id="loading" class="col-12 text-center font-basic">Mohon Tunggu...</h5>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-dark" data-dismiss="modal">Nanti Dulu La
+                    <button type="button" class="btn btn-outline-dark font-basic" data-dismiss="modal">Nanti Dulu La
                     </button>
-                    <button type="button" class="btn btn-dark" onclick="App.enroll()">Beli</button>
+                    <button type="button" class="btn btn-dark font-basic" onclick="enrollNow()">Beli</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <button class="form-control btn-warning" onclick="App.getContractAddress()">Klik Me</button>
+<!--    <button class="form-control btn-warning" onclick="App.getContractAddress()">Klik Me</button>-->
 </div>
-
+<script>
+    function enrollNow() {
+        console.log("CLASS ID: "+classId);
+        App.enroll(classId);
+    }
+</script>
 </body>
 </html>
