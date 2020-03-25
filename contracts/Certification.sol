@@ -46,6 +46,7 @@ contract Certification {
 
     function publishCertificate(string memory classId) public {
         uint jumlahKelas = classCount[msg.sender];
+        require(jumlahKelas>0);
         Class[] memory classList = enrolledClass[msg.sender];
 
         // cek apakah betul mengambil kelas

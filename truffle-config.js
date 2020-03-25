@@ -15,6 +15,11 @@ module.exports = {
       port: 8042,
       network_id: "*",
     },
+    second: {
+      host: "192.168.1.6",
+      port: 8043,
+      network_id: "*",
+    },
     test: {
       host: "127.0.0.1",
       port: 8545

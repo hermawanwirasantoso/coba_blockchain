@@ -30,7 +30,7 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item mr-5">
-                    <a class="nav-link nav-bmk" href="lihat_kelas.html">LIHAT<br>KELAS <span
+                    <a class="nav-link nav-bmk active" href="lihat_kelas.html">LIHAT<br>KELAS <span
                             class="sr-only">(current)</span></a>
                 </li>
                 <li class="nav-item mr-5">
@@ -55,8 +55,7 @@
     </nav>
     <div id="listview" class="container padding-navbar pb-3">
         <script>
-            var db = firebase.firestore();
-            db.collection(kelas_collection).get().then((querySnapshot) => {
+            App.db.collection(kelas_collection).get().then((querySnapshot) => {
                 querySnapshot.forEach((doc) => {
                     console.log(doc.id);
                     let name = `${doc.data().nama_kelas}`;

@@ -40,7 +40,7 @@
                 <a class="nav-link nav-bmk" href="sertifikat_saya.html">SERTIFIKAT<br>SAYA</a>
             </li>
             <li class="nav-item mr-5">
-                <a class="nav-link nav-bmk" href="cek_sertifikat.html">CEK<br>SERTIFIKAT</a>
+                <a class="nav-link nav-bmk active" href="cek_sertifikat.html">CEK<br>SERTIFIKAT</a>
             </li>
         </ul>
         <ul class="navbar-nav my-2 my-lg-0">
@@ -53,5 +53,93 @@
         </ul>
     </div>
 </nav>
+<div class="bg-gray">
+    <div class="container padding-navbar pb-5">
+        <div class="row my-5">
+            <div class="col-5 my-auto">
+                <h5 class="font-basic">Masukan Nomor Sertifikat: </h5>
+            </div>
+            <div class="col-7 my-auto">
+                <div class="input-group">
+                    <div class="input-group-prepend font-basic">
+                        <span class="input-group-text" id="label-input-nomor-sertifikat">#</span>
+                    </div>
+                    <input id="input_no_certificate" type="number" class="form-control font-basic"
+                           placeholder="Nomor Sertifikat"
+                           aria-label="Nomor Sertifikat" aria-describedby="input-nomor-sertifikat">
+                </div>
+            </div>
+        </div>
+        <div class="row my-5">
+            <button class="btn-dark form-control font-basic"
+                    onclick="App.lihatSertifikat($('#input_no_certificate').val())">Cek Sertifikat
+            </button>
+        </div>
+        <div class="row my-5">
+            <h4 id="result-description" class="col-12 font-basic text-center my-auto"></h4>
+        </div>
+        <div id="sertificate-view" class="row my-5 pb-3 bg-clear">
+            <div class='col-2 pt-3'>
+                <img id="ikon_kelas" src="" alt='' width='150'>
+            </div>
+            <div class='col-10 pt-3'>
+                <h1 id="nama-sertifikat"></h1>
+                <h5 id="tanggal-publish-sertifikat"></h5>
+                <h5 id="atas-nama-sertifikat"></h5>
+                <a id="button-lihat-sertifikat" class='btn-outline-dark form-control text-center'>Lihat</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    let sertificate_view = $('#sertificate-view');
+    sertificate_view.hide();
+
+    function showCertificateResult(certificate) {
+        let resultDesc = $('#result-description');
+        let btnLihatSertifikat = $('#button-lihat-sertifikat');
+        btnLihatSertifikat.hide();
+        if (certificate != null) {
+            resultDesc.html('Sertifikat Ditemukan <span class="badge badge-success my-auto">Verified</span>')
+            App.db.collection(kelas_collection).doc(certificate.classId).get().then(function (doc) {
+                if (doc.exists) {
+                    $('#nama-sertifikat').html("Sertifikat " + doc.data().nama_kelas);
+                    $('#ikon_kelas').attr("src", doc.data().icon_kelas);
+                    let publishedDate = new Date(certificate.datePublished * 1000);
+                    publishedDate = publishedDate.getDate() + " " + (App.monthNames[publishedDate.getMonth()]) + " " + publishedDate.getFullYear() + ", " + publishedDate.getHours() + ":" + publishedDate.getMinutes() + ":" + publishedDate.getSeconds();
+                    $('#tanggal-publish-sertifikat').html("Diterbikan: " + publishedDate);
+                } else {
+                    console.log("KELAS TIDAK ADA");
+                }
+            }).then(function () {
+                sertificate_view.show();
+            })
+                .catch(function (error) {
+                    console.log("Error Getting Document: ", error);
+                });
+            App.db.collection(user_collection).doc(certificate.penerima).get().then(function (doc) {
+                if (doc.exists) {
+                    $('#atas-nama-sertifikat').html("Atas Nama: " + doc.data().nama_pengguna);
+                    if (App.account === certificate.penerima) {
+                        btnLihatSertifikat.show();
+                    }
+                } else {
+                    $('#atas-nama-sertifikat').html("Atas Nama Anonim dengan Public Key: " + certificate.penerima);
+                    if (App.account === certificate.penerima) {
+                        btnLihatSertifikat.show();
+                    }
+                }
+            }).then(function () {
+                sertificate_view.show();
+            })
+                .catch(function (error) {
+                    console.log("Error Getting Document: ", error);
+                });
+        } else {
+            resultDesc.html('Sertifikat Tidak Ditemukan <span class="badge badge-danger my-auto">Not Verified</span>')
+            sertificate_view.hide();
+        }
+    }
+</script>
 </body>
 </html>

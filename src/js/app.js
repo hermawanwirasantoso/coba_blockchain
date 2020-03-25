@@ -330,6 +330,8 @@ App = {
             return instance.publishCertificate(classId, {from:App.account});
         }).then(function (result) {
             $('#download-sertifikat-modal').modal('show');
+        }).catch(function (error) {
+            console.error(error);
         })
     },
 
@@ -343,7 +345,8 @@ App = {
             for(let i =1; i<=result; i++){
                 certificationInstance.publishedCertificates(i).then(function (certificate) {
                     if (certificate[1]===App.account){
-                        let c = new Certificate(certificate[3], certificate[2], certificate[0]);
+                        let c = new Certificate(certificate[3], certificate[2],
+                            certificate[0], certificate[1]);
                         sertificateList.push(c);
                     }
                 }).then(function () {
@@ -351,6 +354,23 @@ App = {
                         showCertificates(sertificateList);
                     }
                 })
+            }
+        })
+    },
+
+    lihatSertifikat:function(nomor_sertifikat){
+        let certificationInstance;
+        App.contracts.Certification.deployed().then(function (instance) {
+            certificationInstance = instance;
+            return certificationInstance.certificateCount()
+        }).then(function (jumlahSertifikat) {
+            if (nomor_sertifikat>0 && nomor_sertifikat<=jumlahSertifikat){
+                certificationInstance.publishedCertificates(nomor_sertifikat).then(function (certificate) {
+                    showCertificateResult(new Certificate(certificate[3], certificate[2],
+                        certificate[0], certificate[1]));
+                });
+            }else {
+                showCertificateResult(null);
             }
         })
     }
