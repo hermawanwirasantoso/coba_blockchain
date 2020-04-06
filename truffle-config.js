@@ -11,12 +11,12 @@ module.exports = {
       port: 8545
     },
     live: {
-      host: "192.168.1.6",
+      host: "192.168.1.23",
       port: 8042,
       network_id: "*",
     },
     second: {
-      host: "192.168.1.6",
+      host: "192.168.1.23",
       port: 8043,
       network_id: "*",
     },

@@ -6,7 +6,8 @@ App = {
     isMyClass: false,
     isModuleClass: false,
     isMyCertificate: false,
-    classPrice: 200,
+    isBlockExplorer:false,
+    classPrice: 10,
     monthNames : [
         "Januari", "Februari", "Maret",
         "April", "Mei", "Juni", "Juli",
@@ -35,7 +36,7 @@ App = {
             // let fm = new Fortmatic('pk_test_AFDE79F5F19A4457', customNodeOptions);
             App.web3Provider = new Web3.providers.HttpProvider("http://192.168.1.5:8042");
             web3 = new Web3(App.web3Provider);
-            alert("Tolong Install MetaMask Browser Extension pada Browser Anda")
+            alert("Tolong Install MetaMask Browser Extension pada Browser Anda");
             console.log(web3.eth.getBalance("0xe94770f47ad375fc8e6874547877579f989e452c"));
         }
         return App.initContract();
@@ -118,6 +119,9 @@ App = {
             if (App.isMyCertificate){
                 App.getMyPublishedCertificate();
             }
+            if (App.isBlockExplorer){
+                App.getAllBlock();
+            }
             App.getOwnerAddress();
         });
         // $.getJSON("Election.json", function (election) {
@@ -128,7 +132,6 @@ App = {
         //     App.render();
         // });
     },
-
 
     showEnrolledClass: function () {
         var certificationInstance;
@@ -151,70 +154,6 @@ App = {
                     }
                 })
             }
-        }).catch(function (err) {
-            console.error(err);
-        });
-    },
-    render: function () {
-        var electionInstance;
-        var loader = $("#loader");
-        var content = $("#content");
-
-        loader.show();
-        content.hide();
-
-        // Load account data
-        web3.eth.getCoinbase(function (err, account) {
-            if (err === null) {
-
-                App.account = account;
-                $("#accountAddress").html("Your Account: " + account);
-            }
-        });
-
-        // Load contract data
-        App.contracts.Election.deployed().then(function (instance) {
-            electionInstance = instance;
-            return electionInstance.candidatesCount();
-        }).then(function (candidatesCount) {
-            var candidatesResults = $("#candidatesResults");
-            candidatesResults.empty();
-
-            var candidateSelect = $("#candidatesSelect");
-            candidateSelect.empty();
-
-            for (var i = 1; i <= candidatesCount; i++) {
-                electionInstance.candidates(i).then(function (candidate) {
-                    var id = candidate[0];
-                    var name = candidate[1];
-                    var voteCount = candidate[2];
-
-                    // Render candidate Result
-                    var candidateTemplate = "<tr><th>" + id + "</th><td>" + name + "</td><td>" + voteCount + "</td></tr>";
-                    candidatesResults.append(candidateTemplate);
-
-                    var candidateOption = "<option value='" + id + "'>" + name + "</option>";
-                    candidateSelect.append(candidateOption);
-                });
-            }
-            return electionInstance.voters(App.account);
-        }).then(function (hasVoted) {
-            if (hasVoted) {
-                $('form').hide();
-            }
-            loader.hide();
-            content.show();
-        }).catch(function (error) {
-            console.warn(error);
-        });
-    },
-    castVote: function () {
-        var candidateId = $('#candidatesSelect').val();
-        App.contracts.Election.deployed().then(function (instance) {
-            return instance.vote(candidateId, {from: App.account});
-        }).then(function (result) {
-            $('#content').hide();
-            $('#loader').show();
         }).catch(function (err) {
             console.error(err);
         });
@@ -325,13 +264,42 @@ App = {
             console.log("OWNER ADDRESS: "+ result);
         })
     },
-    publishCertificate: function (classId) {
+    publishCertificate: function (classId, isPublished) {
+        console.log("ISPUBLISHED: "+isPublished);
         App.contracts.Certification.deployed().then(function (instance) {
-            return instance.publishCertificate(classId, {from:App.account});
+            if (isPublished){
+                return true;
+            }else {
+                return instance.publishCertificate(classId, {from: App.account});
+            }
         }).then(function (result) {
             $('#download-sertifikat-modal').modal('show');
         }).catch(function (error) {
             console.error(error);
+        })
+    },
+
+    isPublished: function(classId){
+        let certificationInstance;
+        let isPublished =false;
+        App.contracts.Certification.deployed().then(function (instance) {
+            certificationInstance = instance;
+            return certificationInstance.certificateCount()
+        }).then(function (result) {
+            let sertificateList = [];
+            for(let i =1; i<=result; i++){
+                certificationInstance.publishedCertificates(i).then(function (certificate) {
+                    if (certificate[1]===App.account){
+                        if(certificate[3]===classId){
+                            isPublished = true;
+                        }
+                    }
+                }).then(function () {
+                    if (i==result){
+                        App.publishCertificate(classId, isPublished);
+                    }
+                })
+            }
         })
     },
 
@@ -373,6 +341,25 @@ App = {
                 showCertificateResult(null);
             }
         })
+    },
+
+    getAllBlock:function () {
+        let blockNumber = 0;
+        web3.eth.getBlockNumber(function (error, result) {
+            blockNumber = result;
+            let counter = 0;
+            console.log(blockNumber);
+            for (let i=0; i<blockNumber;i++){
+                web3.eth.getBlock(i, function (error,result) {
+                    if (result.transactions.length>0){
+                        counter++;
+                        console.log(counter);
+                    }
+                });
+            }
+
+        });
+
     }
 };
 $(function () {
